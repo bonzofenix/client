@@ -1,7 +1,8 @@
-require 'bundle/setup'
+require 'bundler/setup'
+require 'webmock/rspec'
 require 'client'
 
 
-Rspec.configure do |config|
+RSpec.configure do |config|
 end
 
