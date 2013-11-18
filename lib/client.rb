@@ -47,7 +47,7 @@ class Client
       @clients ||= {}
     end
 
-    def load_clients(path = 'client.yml')
+    def load_clients(path = "#{Dir.pwd}/client.yml")
       begin
         clients.merge! YAML.load_file(path)
       rescue
@@ -60,10 +60,10 @@ class Client
         '''
         {}
       end
+      generate_clients
     end
 
-    def init
-      load_clients if clients.empty?
+    def generate_clients
       clients.each do |name, info|
         Class.new(Base) do
           self.endpoint = info.fetch('endpoint')
@@ -73,5 +73,7 @@ class Client
       end
     end
   end
+
+  load_clients
 end
 

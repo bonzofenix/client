@@ -1,12 +1,14 @@
 require 'spec_helper'
 
 describe Client do
+  it 'defaults to client.yml if no file is loaded' do
+    Client::RandomClient.should be
+  end
+
   describe 'when there is a config' do
     before do
       stub_request(:any, /.*twitter.*/)
-      Client.load_clients(File.expand_path('../fixtures/twitter.yml',
-                                           File.dirname(__FILE__)))
-      Client.init
+      Client.load_clients("#{Dir.pwd}/twitter.yml")
     end
 
     describe '#load_clients' do
