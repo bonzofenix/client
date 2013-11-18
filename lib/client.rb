@@ -1,4 +1,5 @@
-require "client/version"
+require 'client/version'
+require 'net/http'
 require 'yaml'
 
 class String
