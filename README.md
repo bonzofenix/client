@@ -1,6 +1,6 @@
 # Client
 
-TODO: Write a gem description
+Client provides you with methaprogram ruby rest clients generated from yml configurations.
 
 ## Installation
 
@@ -17,8 +17,36 @@ Or install it yourself as:
     $ gem install client
 
 ## Usage
+Client tries to generate res clients at soon as you require the gem.
+It will try to find `client.yml` in the main folder of your project:
 
-TODO: Write usage instructions here
+    /my_project/client.yml
+    
+The yaml should look something like this:
+
+```yml
+    google:
+        endpoint: 'http://www.google.com'
+```
+
+This will generate a rest client for you to perform post and gets and return NET/http responses:
+
+```ruby
+    require 'client'
+    Client::Google.get 'search', {q: 'bonzofenix gem client'}
+    #This should perform a GET to http://www.google.com/search?q=bonzofenix+gem+client
+```
+
+You can also load specific yml files:
+
+```ruby
+    require 'client'
+    Client.load_clients 'config/twitter.yml', 'config/google.yml'
+    Client::Google.get 'search', {q: 'bonzofenix gem client'}
+    #This should perform a GET to http://www.google.com/search?q=bonzofenix+gem+client
+```
+
+See the spec folder for more examples.
 
 ## Contributing
 
