@@ -7,14 +7,8 @@ Client provides you with methaprogram ruby rest clients generated from yml confi
 Add this line to your application's Gemfile:
 
     gem 'client'
-
-And then execute:
-
-    $ bundle
-
-Or install it yourself as:
-
-    $ gem install client
+    
+and run `bundle`
 
 ## Usage
 Client tries to generate res clients at soon as you require the gem.
@@ -42,8 +36,10 @@ You can also load specific yml files:
 ```ruby
     require 'client'
     Client.load_clients 'config/twitter.yml', 'config/google.yml'
-    Client::Google.get 'search', {q: 'bonzofenix gem client'}
-    #This should perform a GET to http://www.google.com/search?q=bonzofenix+gem+client
+    Client::Twitter
+    # => Client::Twitter
+    Client::Google
+    # => Client::Google
 ```
 
 See the spec folder for more examples.
