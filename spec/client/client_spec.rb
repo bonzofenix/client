@@ -11,9 +11,6 @@ describe Client do
       Client.load_clients("#{Dir.pwd}/twitter.yml")
     end
 
-    describe '#load_clients' do
-      it 'warns when it can fine the file'
-    end
 
     it 'creates a subclass' do
       Client::Twitter.should be
@@ -35,4 +32,9 @@ describe Client do
       WebMock.should have_requested(:get, 'http://twitter.com/tweet?id=10')
     end
   end
+
+
+  describe 'when loading config files manually' do
+      it 'warns when it can fine the file'
+    end
 end

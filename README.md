@@ -1,4 +1,5 @@
 # Client
+[![Build Status](https://travis-ci.org/bonzofenix/client.png)](https://travis-ci.org/bonzofenix/client)
 
 Client provides you with methaprogram ruby rest clients generated from yml configurations.
 
