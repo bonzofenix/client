@@ -1,5 +1,6 @@
 require 'client/version'
 require 'net/http'
+require 'logger'
 require 'yaml'
 
 class String
@@ -21,28 +22,42 @@ end
 class Client
   class Base
     class << self
-      def endpoint= (endpoint)
-        @endpoint = endpoint
-      end
-
-      def endpoint
-        @endpoint
+      attr_accessor :endpoint
+      def perform(method, resource, params)
+        uri = URI("#{endpoint}/#{resource}")
+        case method
+          when :get
+            uri.query = URI.encode_www_form(params) if params
+            Net::HTTP.get_response(uri)
+          when :post
+            Net::HTTP.post_form(uri, params)
+        end.tap do |r|
+          logger.info "Client::Base performed: #{method} to #{uri.to_s} \
+            params: #{params} got: #{r.inspect} code: #{r.code}"
+        end
       end
 
       def post(resource, params)
-        uri = URI("#{endpoint}/#{resource}")
-        Net::HTTP.post_form(uri, params)
+        perform(:post,resource, params)
       end
 
       def get(resource, params = nil)
-        uri = URI("#{endpoint}/#{resource}")
-        uri.query = URI.encode_www_form(params) if params
-        Net::HTTP.get_response(uri)
+        perform(:get ,resource, params)
+      end
+
+      def logger
+        Client.logger
       end
     end
   end
 
   class << self
+    attr_accessor :logger
+
+    def logger
+      @logger ||= Logger.new(STDOUT).tap{ |l| l.level = Logger::WARN }
+    end
+
     def clients
       @clients ||= {}
     end
