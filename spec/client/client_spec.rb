@@ -17,19 +17,28 @@ describe Client do
     end
 
     it 'perform a post' do
-      Client::Twitter.post('tweet', {id: '1', text: 'wtf'})
+      Client::Twitter.post('/tweet', {id: '1', text: 'wtf'})
       WebMock.should have_requested(:post, 'http://twitter.com/tweet')
       .with { |req| req.body == 'id=1&text=wtf' }
     end
 
     it 'perform a get' do
-      Client::Twitter.get('tweet')
+      Client::Twitter.get('/tweet')
       WebMock.should have_requested(:get, 'http://twitter.com/tweet')
     end
 
-    it 'perform a get with params' do
-      Client::Twitter.get('tweet', {id: 10})
-      WebMock.should have_requested(:get, 'http://twitter.com/tweet?id=10')
+    %w{find list}.each do |action|
+      it "perform a get with params for #{action}" do
+        Client::Twitter.send("#{action}_tweet", {id: 10})
+        WebMock.should have_requested(:get, 'http://twitter.com/tweet?id=10')
+      end
+    end
+
+    %w{delete remove destroy}.each do |action|
+      it "perform a delete with the params for #{action}" do
+        Client::Twitter.send("#{action}_tweet", 1)
+        WebMock.should have_requested(:delete, 'http://twitter.com/tweet/1')
+      end
     end
   end
 

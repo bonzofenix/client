@@ -23,14 +23,15 @@ class Client
   class Base
     class << self
       attr_accessor :endpoint
-      def perform(method, resource, params)
-        uri = URI("#{endpoint}/#{resource}")
+
+      def perform(method, resource, params = nil)
         case method
           when :get
-            uri.query = URI.encode_www_form(params) if params
-            Net::HTTP.get_response(uri)
+            api.get(resource)
           when :post
-            Net::HTTP.post_form(uri, params)
+            api.post(resource, www_params)
+          when :delete
+            api.delete(resource)
         end.tap do |r|
           logger.info "Client::Base performed: #{method} to #{uri.to_s} \
             params: #{params} got: #{r.inspect} code: #{r.code}"
@@ -38,7 +39,8 @@ class Client
       end
 
       def post(resource, params)
-        perform(:post,resource, params)
+        @params = params
+        perform(:post, resource)
       end
 
       def get(resource, params = nil)
@@ -47,6 +49,32 @@ class Client
 
       def logger
         Client.logger
+      end
+
+      def method_missing(m, *args, &block)
+        action, path = m.to_s.match(/(^[^_]+(?=_))_(.+)/).captures
+        @params = args.first
+        case action
+          when *%w{find list}
+            perform(:get, "/#{path}?#{www_params}")
+          when *%w{delete remove destroy}
+            perform(:delete, "/#{path}/#{@params}")
+        end
+
+
+      end
+
+      private
+
+      def www_params
+        URI.encode_www_form(@params) if @params
+      end
+      def uri
+        URI(endpoint)
+      end
+
+      def api
+        Net::HTTP.new(uri)
       end
     end
   end
