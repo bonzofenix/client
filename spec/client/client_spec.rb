@@ -11,13 +11,12 @@ describe Client do
       Client.load_clients("#{Dir.pwd}/twitter.yml")
     end
 
-
     it 'creates a subclass' do
       Client::Twitter.should be
     end
 
     it 'perform a post' do
-      Client::Twitter.post('/tweet',body: {id: '1', text: 'wtf'})
+      Client::Twitter.post_tweet(id: '1', text: 'wtf')
       WebMock.should have_requested(:post, 'http://twitter.com/tweet')
       .with { |req| req.body == 'id=1&text=wtf' }
     end
@@ -33,6 +32,7 @@ describe Client do
       WebMock.should have_requested(:get, 'http://twitter.com/tweet')
     end
 
+
     %w{find list}.each do |action|
       it "perform a get with params for #{action}" do
         Client::Twitter.send("#{action}_tweet", {id: 10})
@@ -41,15 +41,25 @@ describe Client do
     end
 
     %w{delete remove destroy}.each do |action|
-      it "perform a delete with params for #{action}" do
+      it "perform a delete with id for #{action}" do
         Client::Twitter.send("#{action}_tweet", 1)
         WebMock.should have_requested(:delete, 'http://twitter.com/tweet/1')
       end
+
+      it "perform a delete with params and id for #{action}" do
+        Client::Twitter.send("#{action}_tweet", 1, {token: 1234})
+        WebMock.should have_requested(:delete, 'http://twitter.com/tweet/1')
+        .with { |req| req.body == 'token=1234' }
+
+      end
     end
+
   end
 
 
   describe 'when loading config files manually' do
       it 'warns when it can fine the file'
     end
+  it 'returns struct'
+  it 'returns json'
 end

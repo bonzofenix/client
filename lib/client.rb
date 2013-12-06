@@ -1,6 +1,8 @@
 require 'client/version'
 require 'net/http'
 require 'httparty'
+require 'recursive-open-struct'
+require 'json'
 require 'logger'
 require 'yaml'
 
@@ -19,6 +21,20 @@ class String
   end
 end
 
+class HTTParty::Response
+  def json
+    ::JSON.parse(self.body)
+  end
+
+  def struct
+    case json
+      when ::Array
+        json.map{|o| ::RecursiveOpenStruct.new o, recurse_over_arrays: true }
+      when ::Hash
+        ::RecursiveOpenStruct.new json, recurse_over_arrays: true
+    end
+  end
+end
 
 class Client
   class Base
@@ -27,14 +43,16 @@ class Client
       # params: #{params} got: #{r.inspect} code: #{r.code}"
 
       def method_missing(m, *args, &block)
-        warn m
         action, path = m.to_s.match(/(^[^_]+(?=_))_(.+)/).captures
-        params = args.first
+        params , body = *args[0..1]
+        warn params
         case action
           when *%w{find list}
             self.get("/#{path}", query: params )
           when *%w{delete remove destroy}
-            self.delete("/#{path}/#{params}")
+            self.delete("/#{path}/#{params}", body: body)
+          when *%w{post create}
+            self.post("/#{path}",body: params)
         end
       end
     end
