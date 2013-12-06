@@ -1,2 +1,2 @@
 random_client:
-  endpoint: 'www.google.com'
+  base_uri: 'www.google.com'

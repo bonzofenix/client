@@ -21,15 +21,26 @@ The yaml should look something like this:
 
 ```yml
     google:
-        endpoint: 'http://www.google.com'
+        base_uri: 'http://www.google.com'
+    twitter:
+        base_uri: 'http://www.twitter.com'
 ```
 
 This will generate a rest client for you to perform post and gets and return NET/http responses:
 
 ```ruby
     require 'client'
-    Client::Google.get 'search', {q: 'bonzofenix gem client'}
+    Client::Google.get 'search', query: {q: 'bonzofenix gem client'}
     #This should perform a GET to http://www.google.com/search?q=bonzofenix+gem+client
+    
+    #Some rest magic too:
+
+    Client::Twitter.list_tweets(user_id: 2) #also try find_
+    #This should perform a GET to http://www.twitter.com/tweets?user_id=bonzofenix+gem+client
+
+    Client::Twitter.destroy_tweets(id: 3) #also try remove_ delete_ 
+    #This should perform a DELETE to http://www.twitter.com/tweets/3
+
 ```
 
 You can also load specific yml files:

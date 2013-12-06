@@ -1,5 +1,6 @@
 require 'client/version'
 require 'net/http'
+require 'httparty'
 require 'logger'
 require 'yaml'
 
@@ -22,59 +23,19 @@ end
 class Client
   class Base
     class << self
-      attr_accessor :endpoint
-
-      def perform(method, resource, params = nil)
-        case method
-          when :get
-            api.get(resource)
-          when :post
-            api.post(resource, www_params)
-          when :delete
-            api.delete(resource)
-        end.tap do |r|
-          logger.info "Client::Base performed: #{method} to #{uri.to_s} \
-            params: #{params} got: #{r.inspect} code: #{r.code}"
-        end
-      end
-
-      def post(resource, params)
-        @params = params
-        perform(:post, resource)
-      end
-
-      def get(resource, params = nil)
-        perform(:get ,resource, params)
-      end
-
-      def logger
-        Client.logger
-      end
+      # logger.info "Client::Base performed: #{method} to #{uri.to_s} \
+      # params: #{params} got: #{r.inspect} code: #{r.code}"
 
       def method_missing(m, *args, &block)
+        warn m
         action, path = m.to_s.match(/(^[^_]+(?=_))_(.+)/).captures
-        @params = args.first
+        params = args.first
         case action
           when *%w{find list}
-            perform(:get, "/#{path}?#{www_params}")
+            self.get("/#{path}", query: params )
           when *%w{delete remove destroy}
-            perform(:delete, "/#{path}/#{@params}")
+            self.delete("/#{path}/#{params}")
         end
-
-
-      end
-
-      private
-
-      def www_params
-        URI.encode_www_form(@params) if @params
-      end
-      def uri
-        URI(endpoint)
-      end
-
-      def api
-        Net::HTTP.new(uri)
       end
     end
   end
@@ -97,19 +58,21 @@ class Client
         warn '''Check that you have an client.env file in your project with
       the following entry.
       gitlab:
-        endpoint: http://gitlab.com/api/v3/
+        base_uri: http://gitlab.com/api/v3/
       other_server:
-        endpoint: other_endpoint.com
+        base_uri: other_endpoint.com
         '''
         {}
       end
       generate_clients
     end
 
+    private
     def generate_clients
       clients.each do |name, info|
         Class.new(Base) do
-          self.endpoint = info.fetch('endpoint')
+          include HTTParty
+          base_uri info.fetch('base_uri')
         end.tap do |client_class|
           const_set(name.camelize, client_class)
         end

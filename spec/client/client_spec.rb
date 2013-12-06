@@ -17,9 +17,15 @@ describe Client do
     end
 
     it 'perform a post' do
-      Client::Twitter.post('/tweet', {id: '1', text: 'wtf'})
+      Client::Twitter.post('/tweet',body: {id: '1', text: 'wtf'})
       WebMock.should have_requested(:post, 'http://twitter.com/tweet')
       .with { |req| req.body == 'id=1&text=wtf' }
+    end
+
+    it 'perform a get with params' do
+      Client::Twitter.get('/tweet', query: {id: 10})
+
+        WebMock.should have_requested(:get, 'http://twitter.com/tweet?id=10')
     end
 
     it 'perform a get' do
@@ -35,7 +41,7 @@ describe Client do
     end
 
     %w{delete remove destroy}.each do |action|
-      it "perform a delete with the params for #{action}" do
+      it "perform a delete with params for #{action}" do
         Client::Twitter.send("#{action}_tweet", 1)
         WebMock.should have_requested(:delete, 'http://twitter.com/tweet/1')
       end
