@@ -43,19 +43,40 @@ class Client
       # params: #{params} got: #{r.inspect} code: #{r.code}"
 
       def method_missing(m, *args, &block)
-        action, path = m.to_s.match(/(^[^_]+(?=_))_(.+)/).captures
-        params , body = *args[0..1]
-        warn params
-        case action
+        parse_method(m)
+        parse_arguments(args)
+        perform_action
+      end
+
+      private
+
+      def perform_action
+        case @action
           when *%w{find list}
-            self.get("/#{path}", query: params )
+            self.get(url, query: @params )
           when *%w{delete remove destroy}
-            self.delete("/#{path}/#{params}", body: body)
+            self.delete(url, body: @params)
           when *%w{post create}
-            self.post("/#{path}",body: params)
+            self.post(url,body: @params)
+        end
+      end
+
+      def parse_method(name)
+        @action, @path = name.to_s.match(/(^[^_]+(?=_))_(.+)/).captures
+      end
+
+      def parse_arguments(args)
+        @id = args.shift if args.first.is_a?(Integer)
+        @params = args.first
+      end
+
+      def url
+        "/#{@path}".tap do |u|
+          u <<  "/#{@id}" if @id
         end
       end
     end
+
   end
 
   class << self
