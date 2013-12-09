@@ -36,9 +36,12 @@ This will generate a rest client for you to perform post and gets and return NET
     #Some rest magic too:
 
     Client::Twitter.list_tweets(user_id: 2) #also try find_
-    #This should perform a GET to http://www.twitter.com/tweets?user_id=bonzofenix+gem+client
+    #This should perform a GET to http://www.twitter.com/tweets?user_id=2
 
-    Client::Twitter.destroy_tweets(id: 3) #also try remove_ delete_ 
+    Client::Twitter.list_tweets(1, token: 'asd123') #also try find_
+    #This should perform a GET to http://www.twitter.com/tweets/1?token=asd123
+
+    Client::Twitter.destroy_tweets(3) #also try remove_ delete_ 
     #This should perform a DELETE to http://www.twitter.com/tweets/3
 
 ```
