@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.email         = ["bonzofenix@gmail.com"]
   spec.description   = %q{Client gives you the possibility to hit rest endpoints in an elegant way}
   spec.summary       = %q{solves rest comunications}
-  spec.homepage      = ""
+  spec.homepage      = "https://github.com/bonzofenix/client"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files`.split($/)
