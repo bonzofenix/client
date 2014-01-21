@@ -23,16 +23,26 @@ describe Client do
       client.should be
     end
 
+    it 'returns the endpoint' do
+      client.base_uri.should  =='http://twitter.com'
+    end
     it 'perform a post' do
       client.post_tweet(id: '1', text: 'wtf')
       WebMock.should have_requested(:post, 'http://twitter.com/tweet')
       .with { |req| req.body == 'id=1&text=wtf' }
     end
 
+    describe 'when json content type is given ' do
+      it 'parse the post body to json' do
+      client.post_tweet(id: '1', text: 'wtf', content_type: :json)
+      WebMock.should have_requested(:post, 'http://twitter.com/tweet')
+      .with { |req| req.body == '{"id":"1","text":"wtf"}' }
+      end
+    end
+
     it 'perform a get with params' do
       client.get('/tweet', query: {id: 10})
-
-        WebMock.should have_requested(:get, 'http://twitter.com/tweet?id=10')
+      WebMock.should have_requested(:get, 'http://twitter.com/tweet?id=10')
     end
 
     it 'perform a get' do

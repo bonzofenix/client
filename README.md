@@ -38,12 +38,17 @@ This will generate a rest client for you to perform post and gets and return NET
     Client::Twitter.list_tweets(user_id: 2) #also try find_
     #This should perform a GET to http://www.twitter.com/tweets?user_id=2
 
-    Client::Twitter.list_tweets(1, token: 'asd123') #also try find_
+    Client::Twitter.list_tweets(1, token: 'asd123') #also try find_1
     #This should perform a GET to http://www.twitter.com/tweets/1?token=asd123
 
     Client::Twitter.destroy_tweets(3) #also try remove_ delete_ 
     #This should perform a DELETE to http://www.twitter.com/tweets/3
 
+    Client::Twitter.create_tweet(text: 'a tweet') #also try post_
+    #This should perform a POST to http://www.twitter.com/tweets2 with body: text='a tweet'
+
+    Client::Twitter.create_tweet(text: 'a tweet', content_type: :json) #also try post_
+    #This should perform a POST to http://www.twitter.com/tweets with body: '{"text": "a tweet"}' and header CONTENT-TYPE application/json
 ```
 
 You can also load specific yml files:

@@ -50,16 +50,30 @@ class Client
 
       private
 
+      def params
+        {}.tap do |p|
+          if @content_type == :json
+            p.merge!(
+              :headers => {
+                'Content-Type' => 'application/json'
+              }
+            )
+            @opts = @opts.to_json
+          end
+        end
+      end
+
       def perform_action
         case @action
           when *%w{find list}
-            self.get(url, query: @params )
+            self.get(url, params.merge(query: @opts))
           when *%w{delete remove destroy}
-            self.delete(url, body: @params)
+            self.delete(url, params.merge(body: @opts))
           when *%w{post create}
-            self.post(url,body: @params)
+            self.post(url, params.merge(body: @opts))
         end
       end
+
 
       def parse_method(name)
         @action, @path = name.to_s.match(/(^[^_]+(?=_))_(.+)/).captures
@@ -67,7 +81,10 @@ class Client
 
       def parse_arguments(args)
         @id = args.shift if args.first.is_a?(Integer)
-        @params = args.first
+        if args.first
+          @opts = args.first
+          @content_type = @opts.delete(:content_type)
+        end
       end
 
       def url
