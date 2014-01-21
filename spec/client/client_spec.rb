@@ -27,14 +27,14 @@ describe Client do
       client.base_uri.should  =='http://twitter.com'
     end
     it 'perform a post' do
-      client.post_tweet(id: '1', text: 'wtf')
+      client.post_tweet(body: {id: '1', text: 'wtf'})
       WebMock.should have_requested(:post, 'http://twitter.com/tweet')
       .with { |req| req.body == 'id=1&text=wtf' }
     end
 
     describe 'when json content type is given ' do
       it 'parse the post body to json' do
-      client.post_tweet(id: '1', text: 'wtf', content_type: :json)
+      client.post_tweet(body:{id: '1', text: 'wtf'}, content_type: :json)
       WebMock.should have_requested(:post, 'http://twitter.com/tweet')
       .with { |req| req.body == '{"id":"1","text":"wtf"}' }
       end
@@ -53,12 +53,12 @@ describe Client do
 
     %w{find list}.each do |action|
       it "perform a get with params for #{action}" do
-        client.send("#{action}_tweet", {id: 10})
+        client.send("#{action}_tweet", query: {id: 10})
         WebMock.should have_requested(:get, 'http://twitter.com/tweet?id=10')
       end
 
       it "perform a get with params and id for #{action}" do
-        client.send("#{action}_tweet", 1, {token: 1234})
+        client.send("#{action}_tweet", 1, query: {token: 1234})
         WebMock.should have_requested(:get, 'http://twitter.com/tweet/1?token=1234')
       end
     end
@@ -70,7 +70,7 @@ describe Client do
       end
 
       it "perform a delete with params and id for #{action}" do
-        client.send("#{action}_tweet", 1, {token: 1234})
+        client.send("#{action}_tweet", 1, body: {token: 1234})
         WebMock.should have_requested(:delete, 'http://twitter.com/tweet/1')
         .with { |req| req.body == 'token=1234' }
 

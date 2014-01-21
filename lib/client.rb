@@ -45,32 +45,27 @@ class Client
       def method_missing(m, *args, &block)
         parse_method(m)
         parse_arguments(args)
+        set_content_type
         perform_action
       end
 
       private
 
-      def params
-        {}.tap do |p|
-          if @content_type == :json
-            p.merge!(
-              :headers => {
-                'Content-Type' => 'application/json'
-              }
-            )
-            @opts = @opts.to_json
+      def set_content_type
+          if @opts && @opts.delete(:content_type) == :json
+            @opts[:headers] = { 'Content-Type' => 'application/json' }
+            @opts[:body] = @opts[:body].to_json
           end
-        end
       end
 
       def perform_action
         case @action
           when *%w{find list}
-            self.get(url, params.merge(query: @opts))
+            self.get(url,  @opts)
           when *%w{delete remove destroy}
-            self.delete(url, params.merge(body: @opts))
+            self.delete(url, @opts)
           when *%w{post create}
-            self.post(url, params.merge(body: @opts))
+            self.post(url, @opts)
         end
       end
 
@@ -81,10 +76,7 @@ class Client
 
       def parse_arguments(args)
         @id = args.shift if args.first.is_a?(Integer)
-        if args.first
-          @opts = args.first
-          @content_type = @opts.delete(:content_type)
-        end
+        @opts = args.first || {}
       end
 
       def url
