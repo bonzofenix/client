@@ -12,7 +12,7 @@ Add this line to your application's Gemfile:
 and run `bundle`
 
 ## Usage
-Client tries to generate res clients at soon as you require the gem.
+Client tries to generate rest clients as soon as you require the gem.
 It will try to find `client.yml` in the main folder of your project:
 
     /my_project/client.yml
@@ -26,13 +26,13 @@ The yaml should look something like this:
         base_uri: 'http://www.twitter.com'
 ```
 
-This will generate a rest client for you to perform post and gets and return NET/http responses:
+This will generate a rest client for you to perform post and gets and return NET/HTTP responses:
 
 ```ruby
     require 'client'
     Client::Google.get 'search', query: {q: 'bonzofenix gem client'}
     #This should perform a GET to http://www.google.com/search?q=bonzofenix+gem+client
-    
+
     #Some rest magic too:
 
     Client::Twitter.list_tweets(query: {user_id: 2}) #also try find_
