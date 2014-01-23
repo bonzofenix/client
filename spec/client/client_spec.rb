@@ -4,13 +4,13 @@ describe Client do
   subject(:client) do
     Client::RandomClient
   end
+  before{ stub_const('ENV', {'RACK_ENV' => nil}) }
 
   it 'defaults to client.yml if no file is loaded' do
     client.should be
   end
 
   describe 'when RACK_ENV is presence' do
-
     it 'tries to load config/client_production.yml' do
       stub_const('ENV', {'RACK_ENV' => 'production'})
       Client.load_clients
