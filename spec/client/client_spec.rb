@@ -9,6 +9,15 @@ describe Client do
     client.should be
   end
 
+  describe 'when RACK_ENV is presence' do
+
+    it 'tries to load config/client_production.yml' do
+      ENV['RACK_ENV'] = 'production'
+      Client.load_clients
+      Client.loaded_config_files.first.should match(/config\/client_production.yml/)
+    end
+  end
+
   describe 'when there is a config' do
     before do
       stub_request(:any, /.*twitter.*/)
@@ -77,12 +86,6 @@ describe Client do
       end
     end
 
-  end
-
-  describe 'when working with nested urls' do
-    pending 'resolves first level of nested resource' do
-      client.groups(1).should be_kind_of(client)
-    end
   end
 
 

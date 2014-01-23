@@ -89,7 +89,7 @@ class Client
   end
 
   class << self
-    attr_accessor :logger
+    attr_accessor :logger, :loaded_config_files
 
     def logger
       @logger ||= Logger.new(STDOUT).tap{ |l| l.level = Logger::WARN }
@@ -98,10 +98,13 @@ class Client
     def clients
       @clients ||= {}
     end
-
+    def loaded_config_files
+      @loaded_config_files ||= []
+    end
     def load_clients(path = "#{Dir.pwd}/client.yml")
       begin
         clients.merge! YAML.load_file(path)
+        loaded_config_files << path
       rescue
         warn '''Check that you have an client.env file in your project with
       the following entry.
@@ -116,6 +119,15 @@ class Client
     end
 
     private
+    def default_config_path
+      puts ENV.inspect
+      if ENV['RACK_ENV']
+      "#{Dir.pwd}/client_#{ENV['RACK_ENV']}.yml"
+    else
+      "#{Dir.pwd}/client.yml"
+    end
+  end
+
     def generate_clients
       clients.each do |name, info|
         Class.new(Base) do
