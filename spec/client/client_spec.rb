@@ -12,9 +12,9 @@ describe Client do
   describe 'when RACK_ENV is presence' do
 
     it 'tries to load config/client_production.yml' do
-      ENV['RACK_ENV'] = 'production'
+      stub_const('ENV', {'RACK_ENV' => 'production'})
       Client.load_clients
-      Client.loaded_config_files.first.should match(/config\/client_production.yml/)
+      Client.loaded_config_files[1].should match(/config\/client_production.yml/)
     end
   end
 

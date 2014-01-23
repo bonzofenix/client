@@ -101,18 +101,18 @@ class Client
     def loaded_config_files
       @loaded_config_files ||= []
     end
-    def load_clients(path = "#{Dir.pwd}/client.yml")
+    def load_clients(path = default_config_path)
       begin
         clients.merge! YAML.load_file(path)
         loaded_config_files << path
       rescue
-        warn '''Check that you have an client.env file in your project with
-      the following entry.
-      gitlab:
-        base_uri: http://gitlab.com/api/v3/
-      other_server:
-        base_uri: other_endpoint.com
-        '''
+        warn """Check that you have an file in:  \n\t
+        #{path}
+
+that respects the following format:  \n\t
+      example:
+        base_uri: http://example.com/api/v3/
+        """
         {}
       end
       generate_clients
@@ -120,9 +120,8 @@ class Client
 
     private
     def default_config_path
-      puts ENV.inspect
       if ENV['RACK_ENV']
-      "#{Dir.pwd}/client_#{ENV['RACK_ENV']}.yml"
+      "#{Dir.pwd}/config/client_#{ENV['RACK_ENV']}.yml"
     else
       "#{Dir.pwd}/client.yml"
     end
