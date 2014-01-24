@@ -78,6 +78,11 @@ describe Client do
         WebMock.should have_requested(:delete, 'http://twitter.com/tweet/1')
       end
 
+      pending "accepts id as string as long as they can be converted to number" do
+        client.send("#{action}_tweet", '1')
+        WebMock.should have_requested(:delete, 'http://twitter.com/tweet/1')
+      end
+
       it "perform a delete with params and id for #{action}" do
         client.send("#{action}_tweet", 1, body: {token: 1234})
         WebMock.should have_requested(:delete, 'http://twitter.com/tweet/1')

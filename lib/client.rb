@@ -21,6 +21,12 @@ class String
   end
 end
 
+class Object
+  def is_number?
+    self.to_f.to_s == self.to_s || self.to_i.to_s == self.to_s
+  end
+end
+
 class HTTParty::Response
   def json
     ::JSON.parse(self.body)
@@ -38,52 +44,52 @@ end
 
 class Client
   class Base
+    class MetaRequest
+    end
     class << self
       # logger.info "Client::Base performed: #{method} to #{uri.to_s} \
       # params: #{params} got: #{r.inspect} code: #{r.code}"
 
       def method_missing(m, *args, &block)
-        parse_method(m)
-        parse_arguments(args)
-        set_content_type
-        perform_action
+        action, path = parse_method(m)
+        id, opts = parse_arguments(args)
+        opts = set_content_type(opts)
+        perform_action(path,action,opts,id )
       end
 
       private
 
-      def set_content_type
-          if @opts && @opts.delete(:content_type) == :json
-            @opts[:headers] = { 'Content-Type' => 'application/json' }
-            @opts[:body] = @opts[:body].to_json
+      def set_content_type(opts)
+          if opts && opts.delete(:content_type) == :json
+            opts[:headers] = { 'Content-Type' => 'application/json' }
+            opts[:body] = opts[:body].to_json
           end
+          opts
       end
 
-      def perform_action
-        case @action
+      def perform_action(path,action,opts,id)
+        url = "/#{path}#{ "/#{id}" if id }"
+        case action
           when *%w{find list}
-            self.get(url,  @opts)
+            self.get(url,  opts)
           when *%w{delete remove destroy}
-            self.delete(url, @opts)
+            self.delete(url, opts)
           when *%w{post create}
-            self.post(url, @opts)
+            self.post(url, opts)
         end
       end
 
 
       def parse_method(name)
-        @action, @path = name.to_s.match(/(^[^_]+(?=_))_(.+)/).captures
+        name.to_s.match(/(^[^_]+(?=_))_(.+)/).captures
       end
 
       def parse_arguments(args)
-        @id = args.shift if args.first.is_a?(Integer)
-        @opts = args.first || {}
+        id = args.shift if args.first.is_a?(Integer)
+        opts = args.first || {}
+        [id, opts]
       end
 
-      def url
-        "/#{@path}".tap do |u|
-          u <<  "/#{@id}" if @id
-        end
-      end
     end
 
   end
