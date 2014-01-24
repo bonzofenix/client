@@ -60,30 +60,9 @@ class Client
         parse_arguments
         set_content_type
         perform_action
->>>>>>> ef47c2a7a7d82b6d0a6d727f5275933a46e0fac8
-      end
-    end
-
-    class MetaRequest
-      include HTTParty
-
-<<<<<<< HEAD
-      def initialize(base_klass, method, args)
-        @base_klass = base_klass
-        @method = method
-        @args = args
-      end
-
-      def run
-        parse_method
-        parse_arguments
-        set_content_type
-        perform_action
       end
 
       private
-=======
->>>>>>> ef47c2a7a7d82b6d0a6d727f5275933a46e0fac8
       def set_content_type
           if @opts && @opts.delete(:content_type) == :json
             @opts[:headers] = { 'Content-Type' => 'application/json' }
@@ -165,10 +144,6 @@ that respects the following format:  \n\t
         Class.new(Base) do
           include HTTParty
           self.base_uri info.fetch('base_uri')
-<<<<<<< HEAD
-=======
-
->>>>>>> ef47c2a7a7d82b6d0a6d727f5275933a46e0fac8
         end.tap do |client_class|
           const_set(name.camelize, client_class)
         end
