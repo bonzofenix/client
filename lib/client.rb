@@ -21,12 +21,6 @@ class String
   end
 end
 
-class Object
-  def is_number?
-    self.to_f.to_s == self.to_s || self.to_i.to_s == self.to_s
-  end
-end
-
 class HTTParty::Response
   def json
     ::JSON.parse(self.body)
@@ -44,52 +38,61 @@ end
 
 class Client
   class Base
-    class MetaRequest
-    end
     class << self
-      # logger.info "Client::Base performed: #{method} to #{uri.to_s} \
-      # params: #{params} got: #{r.inspect} code: #{r.code}"
-
       def method_missing(m, *args, &block)
-        action, path = parse_method(m)
-        id, opts = parse_arguments(args)
-        opts = set_content_type(opts)
-        perform_action(path,action,opts,id )
+        MetaRequest.new(self , m, args).run
+      end
+    end
+
+    class MetaRequest
+      include HTTParty
+
+      def initialize(base_klass, method, args)
+        @base_klass = base_klass
+        @method = method
+        @args = args
+      end
+
+      def run
+        parse_method
+        parse_arguments
+        set_content_type
+        perform_action
       end
 
       private
-
-      def set_content_type(opts)
-          if opts && opts.delete(:content_type) == :json
-            opts[:headers] = { 'Content-Type' => 'application/json' }
-            opts[:body] = opts[:body].to_json
+      def set_content_type
+          if @opts && @opts.delete(:content_type) == :json
+            @opts[:headers] = { 'Content-Type' => 'application/json' }
+            @opts[:body] = @opts[:body].to_json
           end
-          opts
       end
 
-      def perform_action(path,action,opts,id)
-        url = "/#{path}#{ "/#{id}" if id }"
-        case action
+      def perform_action
+        case @action
           when *%w{find list}
-            self.get(url,  opts)
+            @base_klass.get(url,  @opts)
           when *%w{delete remove destroy}
-            self.delete(url, opts)
+            @base_klass.delete(url, @opts)
           when *%w{post create}
-            self.post(url, opts)
+            @base_klass.post(url, @opts)
         end
       end
 
-
-      def parse_method(name)
-        name.to_s.match(/(^[^_]+(?=_))_(.+)/).captures
+      def parse_method
+        @action, @path = @method.to_s.match(/(^[^_]+(?=_))_(.+)/).captures
       end
 
-      def parse_arguments(args)
-        id = args.shift if args.first.is_a?(Integer)
-        opts = args.first || {}
-        [id, opts]
+      def parse_arguments
+        @id = @args.shift if @args.first.is_a?(Integer)
+        @opts = @args.first || {}
       end
 
+      def url
+        "/#{@path}".tap do |u|
+          u <<  "/#{@id}" if @id
+        end
+      end
     end
 
   end
@@ -104,6 +107,7 @@ class Client
     def clients
       @clients ||= {}
     end
+
     def loaded_config_files
       @loaded_config_files ||= []
     end
@@ -137,7 +141,7 @@ that respects the following format:  \n\t
       clients.each do |name, info|
         Class.new(Base) do
           include HTTParty
-          base_uri info.fetch('base_uri')
+          self.base_uri info.fetch('base_uri')
         end.tap do |client_class|
           const_set(name.camelize, client_class)
         end
