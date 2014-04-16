@@ -7,6 +7,7 @@ describe Client do
   before{ stub_const('ENV', {'RACK_ENV' => nil}) }
 
   it 'defaults to client.yml if no file is loaded' do
+    require 'client'
     client.should be
   end
 
