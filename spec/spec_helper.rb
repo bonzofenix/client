@@ -2,7 +2,8 @@ require 'bundler/setup'
 require 'webmock/rspec'
 
 Dir.chdir File.expand_path('fixtures', File.dirname(__FILE__))
-puts 'HOLAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',ENV['RACK_ENV']
+# Cleans the env so that it requires the yml file in the root path.
+ENV['RACK_ENV']= ''
 require 'client'
 
 
